@@ -10,6 +10,11 @@ name = "cove"
 [workspace]
 members = ["crates/*", "xtask"]
 
+[patch.crates-io]
+bdk_wallet = { path = "external/bdk/bdk_wallet" }
+bdk_chain = { path = "external/bdk/bdk_chain" }
+bdk_core = { path = "external/bdk/bdk_core" }
+
 ## MARK: WORKSPACE DEPENDENCIES
 [workspace.dependencies]
 # bindings
@@ -90,7 +95,7 @@ eyre = "0.6"
 
 # database
 redb = "2.6"
-rusqlite = { version = "0.31", features = ["bundled-sqlcipher-vendored-openssl"] }
+rusqlite = { version = "0.38", features = ["bundled-sqlcipher-vendored-openssl"] }
 
 # ids
 nid = "3.0"

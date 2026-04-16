@@ -7,3 +7,4 @@ edition = "2024"
 reqwest = { workspace = true }
 rustls = { version = "0.23", features = ["ring"], default-features = false }
 webpki-roots = "1.0"
+arti-client = { version = "0.40", default-features = false, features = ["tokio", "rustls", "compression"] }
