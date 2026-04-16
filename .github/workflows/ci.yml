@@ -93,6 +93,113 @@ jobs:
       - name: Compile iOS
         run: cd ios && xcodebuild -scheme Cove -sdk iphonesimulator -arch arm64 build
 
+  ios-size-report:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build iOS release FFI
+        run: cd rust && cargo xtask build-ios release-speed --device
+
+      - name: Build iOS Release app (simulator)
+        run: cd ios && xcodebuild -scheme Cove -configuration Release -sdk iphonesimulator -arch arm64 -derivedDataPath build-ci CODE_SIGNING_ALLOWED=NO build
+
+      - name: Collect dependency and size metrics
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          cd rust
+          cargo metadata --format-version 1 > ../artifacts/cargo-metadata.json
+          cd ..
+
+          python3 - <<'PY'
+          import json
+          from collections import deque
+          from pathlib import Path
+
+          meta = json.loads(Path("artifacts/cargo-metadata.json").read_text())
+          id_to_pkg = {p["id"]: p for p in meta["packages"]}
+          root = None
+          for pkg in meta["packages"]:
+              if pkg["name"] == "cove-http" and pkg.get("manifest_path", "").endswith("/rust/crates/cove-http/Cargo.toml"):
+                  root = pkg["id"]
+                  break
+          if root is None:
+              raise SystemExit("Could not find workspace cove-http package in cargo metadata")
+
+          resolve_nodes = {n["id"]: n for n in meta["resolve"]["nodes"]}
+          seen = set()
+          q = deque([root])
+          while q:
+              cur = q.popleft()
+              if cur in seen:
+                  continue
+              seen.add(cur)
+              node = resolve_nodes.get(cur, {"deps": []})
+              for dep in node.get("deps", []):
+                  q.append(dep["pkg"])
+
+          cove_http_reachable = len(seen)
+          total_packages = len(meta["packages"])
+
+          Path("artifacts/dependency-metrics.txt").write_text(
+              f"workspace_total_packages={total_packages}\n"
+              f"cove_http_reachable_packages={cove_http_reachable}\n"
+          )
+          PY
+
+          DEVICE_LIB="rust/target/aarch64-apple-ios/release-speed/libcove.a"
+          XCFRAMEWORK_DIR="ios/CoveCore/Sources/cove_core_ffi.xcframework"
+          IOS_APP_DIR="ios/build-ci/Build/Products/Release-iphonesimulator/Cove.app"
+
+          DEVICE_LIB_BYTES=0
+          XCFRAMEWORK_BYTES=0
+          IOS_APP_BYTES=0
+
+          if [ -f "$DEVICE_LIB" ]; then
+            DEVICE_LIB_BYTES=$(stat -f%z "$DEVICE_LIB")
+          fi
+
+          if [ -d "$XCFRAMEWORK_DIR" ]; then
+            XCFRAMEWORK_BYTES=$(du -sk "$XCFRAMEWORK_DIR" | awk '{print $1 * 1024}')
+          fi
+
+          if [ -d "$IOS_APP_DIR" ]; then
+            IOS_APP_BYTES=$(du -sk "$IOS_APP_DIR" | awk '{print $1 * 1024}')
+          fi
+
+          {
+            echo "device_static_lib_bytes=$DEVICE_LIB_BYTES"
+            echo "xcframework_bytes=$XCFRAMEWORK_BYTES"
+            echo "ios_release_simulator_app_bytes=$IOS_APP_BYTES"
+          } > artifacts/ios-size-metrics.txt
+
+          {
+            echo "# iOS size/dependency report"
+            echo
+            echo "## Dependency metrics"
+            cat artifacts/dependency-metrics.txt
+            echo
+            echo "## Size metrics (bytes)"
+            cat artifacts/ios-size-metrics.txt
+          } > artifacts/ios-size-report.md
+
+      - name: Upload iOS size artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-size-report
+          path: |
+            artifacts/ios-size-report.md
+            artifacts/dependency-metrics.txt
+            artifacts/ios-size-metrics.txt
+
   test:
     strategy:
       matrix:
