@@ -1032,7 +1032,13 @@ internal object IntegrityCheckingUniffiLib {
         uniffiCheckContractApiVersion(this)
         uniffiCheckApiChecksums(this)
     }
+    external fun uniffi_cove_checksum_func_clear_tor_connection_logs(
+    ): Short
+    external fun uniffi_cove_checksum_func_ensure_built_in_tor_bootstrap(
+    ): Short
     external fun uniffi_cove_checksum_func_set_root_data_dir(
+    ): Short
+    external fun uniffi_cove_checksum_func_tor_connection_logs(
     ): Short
     external fun uniffi_cove_checksum_func_initialize_app(
     ): Short
@@ -1275,6 +1281,14 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_cove_checksum_method_globalconfigtable_set_selected_network(
     ): Short
     external fun uniffi_cove_checksum_method_globalconfigtable_set_selected_node(
+    ): Short
+    external fun uniffi_cove_checksum_method_globalconfigtable_set_tor_external_port(
+    ): Short
+    external fun uniffi_cove_checksum_method_globalconfigtable_set_use_tor(
+    ): Short
+    external fun uniffi_cove_checksum_method_globalconfigtable_tor_external_port(
+    ): Short
+    external fun uniffi_cove_checksum_method_globalconfigtable_use_tor(
     ): Short
     external fun uniffi_cove_checksum_method_globalconfigtable_wallet_mode(
     ): Short
@@ -2232,6 +2246,14 @@ internal object UniffiLib {
     ): Unit
     external fun uniffi_cove_fn_method_globalconfigtable_set_selected_node(`ptr`: Long,`node`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    external fun uniffi_cove_fn_method_globalconfigtable_set_tor_external_port(`ptr`: Long,`port`: Short,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_cove_fn_method_globalconfigtable_set_use_tor(`ptr`: Long,`useTor`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_cove_fn_method_globalconfigtable_tor_external_port(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Short
+    external fun uniffi_cove_fn_method_globalconfigtable_use_tor(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     external fun uniffi_cove_fn_method_globalconfigtable_wallet_mode(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_cove_fn_clone_globalflagtable(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -3300,8 +3322,14 @@ internal object UniffiLib {
     ): Byte
     external fun uniffi_cove_fn_method_walletmetadata_uniffi_trait_hash(`ptr`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
+    external fun uniffi_cove_fn_func_clear_tor_connection_logs(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    external fun uniffi_cove_fn_func_ensure_built_in_tor_bootstrap(
+    ): Long
     external fun uniffi_cove_fn_func_set_root_data_dir(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    external fun uniffi_cove_fn_func_tor_connection_logs(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_cove_fn_func_initialize_app(uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     external fun uniffi_cove_fn_func_bootstrap(
@@ -3515,7 +3543,16 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 }
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
+    if (lib.uniffi_cove_checksum_func_clear_tor_connection_logs() != 25876.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_func_ensure_built_in_tor_bootstrap() != 8592.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_cove_checksum_func_set_root_data_dir() != 56109.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_func_tor_connection_logs() != 59010.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_cove_checksum_func_initialize_app() != 18498.toShort()) {
@@ -3879,6 +3916,18 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_cove_checksum_method_globalconfigtable_set_selected_node() != 44882.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_method_globalconfigtable_set_tor_external_port() != 2190.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_method_globalconfigtable_set_use_tor() != 3178.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_method_globalconfigtable_tor_external_port() != 48622.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_cove_checksum_method_globalconfigtable_use_tor() != 22520.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_cove_checksum_method_globalconfigtable_wallet_mode() != 27720.toShort()) {
@@ -12019,6 +12068,14 @@ public interface GlobalConfigTableInterface {
     
     fun `setSelectedNode`(`node`: Node)
     
+    fun `setTorExternalPort`(`port`: kotlin.UShort)
+    
+    fun `setUseTor`(`useTor`: kotlin.Boolean)
+    
+    fun `torExternalPort`(): kotlin.UShort
+    
+    fun `useTor`(): kotlin.Boolean
+    
     fun `walletMode`(): WalletMode
     
     companion object
@@ -12372,6 +12429,58 @@ open class GlobalConfigTable: Disposable, AutoCloseable, GlobalConfigTableInterf
 }
     }
     
+    
+
+    
+    @Throws(DatabaseException::class)override fun `setTorExternalPort`(`port`: kotlin.UShort)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(DatabaseException) { _status ->
+    UniffiLib.uniffi_cove_fn_method_globalconfigtable_set_tor_external_port(
+        it,
+        FfiConverterUShort.lower(`port`),_status)
+}
+    }
+    
+    
+
+    
+    @Throws(DatabaseException::class)override fun `setUseTor`(`useTor`: kotlin.Boolean)
+        = 
+    callWithHandle {
+    uniffiRustCallWithError(DatabaseException) { _status ->
+    UniffiLib.uniffi_cove_fn_method_globalconfigtable_set_use_tor(
+        it,
+        FfiConverterBoolean.lower(`useTor`),_status)
+}
+    }
+    
+    
+
+    override fun `torExternalPort`(): kotlin.UShort {
+            return FfiConverterUShort.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_cove_fn_method_globalconfigtable_tor_external_port(
+        it,
+        _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `useTor`(): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_cove_fn_method_globalconfigtable_use_tor(
+        it,
+        _status)
+}
+    }
+    )
+    }
     
 
     override fun `walletMode`(): WalletMode {
@@ -37897,6 +38006,18 @@ sealed class GlobalConfigKey {
         companion object
     }
     
+    object UseTor : GlobalConfigKey()
+    
+    
+    object TorMode : GlobalConfigKey()
+    
+    
+    object TorExternalHost : GlobalConfigKey()
+    
+    
+    object TorExternalPort : GlobalConfigKey()
+    
+    
     object ColorScheme : GlobalConfigKey()
     
     
@@ -37949,16 +38070,20 @@ public object FfiConverterTypeGlobalConfigKey : FfiConverterRustBuffer<GlobalCon
             4 -> GlobalConfigKey.SelectedNode(
                 FfiConverterTypeNetwork.read(buf),
                 )
-            5 -> GlobalConfigKey.ColorScheme
-            6 -> GlobalConfigKey.AuthType
-            7 -> GlobalConfigKey.HashedPinCode
-            8 -> GlobalConfigKey.WipeDataPin
-            9 -> GlobalConfigKey.DecoyPin
-            10 -> GlobalConfigKey.InDecoyMode
-            11 -> GlobalConfigKey.MainSelectedWalletId
-            12 -> GlobalConfigKey.DecoySelectedWalletId
-            13 -> GlobalConfigKey.LockedAt
-            14 -> GlobalConfigKey.OnboardingProgress
+            5 -> GlobalConfigKey.UseTor
+            6 -> GlobalConfigKey.TorMode
+            7 -> GlobalConfigKey.TorExternalHost
+            8 -> GlobalConfigKey.TorExternalPort
+            9 -> GlobalConfigKey.ColorScheme
+            10 -> GlobalConfigKey.AuthType
+            11 -> GlobalConfigKey.HashedPinCode
+            12 -> GlobalConfigKey.WipeDataPin
+            13 -> GlobalConfigKey.DecoyPin
+            14 -> GlobalConfigKey.InDecoyMode
+            15 -> GlobalConfigKey.MainSelectedWalletId
+            16 -> GlobalConfigKey.DecoySelectedWalletId
+            17 -> GlobalConfigKey.LockedAt
+            18 -> GlobalConfigKey.OnboardingProgress
             else -> throw RuntimeException("invalid enum value, something is very wrong!!")
         }
     }
@@ -37987,6 +38112,30 @@ public object FfiConverterTypeGlobalConfigKey : FfiConverterRustBuffer<GlobalCon
             (
                 4UL
                 + FfiConverterTypeNetwork.allocationSize(value.v1)
+            )
+        }
+        is GlobalConfigKey.UseTor -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GlobalConfigKey.TorMode -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GlobalConfigKey.TorExternalHost -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is GlobalConfigKey.TorExternalPort -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
             )
         }
         is GlobalConfigKey.ColorScheme -> {
@@ -38070,44 +38219,60 @@ public object FfiConverterTypeGlobalConfigKey : FfiConverterRustBuffer<GlobalCon
                 FfiConverterTypeNetwork.write(value.v1, buf)
                 Unit
             }
-            is GlobalConfigKey.ColorScheme -> {
+            is GlobalConfigKey.UseTor -> {
                 buf.putInt(5)
                 Unit
             }
-            is GlobalConfigKey.AuthType -> {
+            is GlobalConfigKey.TorMode -> {
                 buf.putInt(6)
                 Unit
             }
-            is GlobalConfigKey.HashedPinCode -> {
+            is GlobalConfigKey.TorExternalHost -> {
                 buf.putInt(7)
                 Unit
             }
-            is GlobalConfigKey.WipeDataPin -> {
+            is GlobalConfigKey.TorExternalPort -> {
                 buf.putInt(8)
                 Unit
             }
-            is GlobalConfigKey.DecoyPin -> {
+            is GlobalConfigKey.ColorScheme -> {
                 buf.putInt(9)
                 Unit
             }
-            is GlobalConfigKey.InDecoyMode -> {
+            is GlobalConfigKey.AuthType -> {
                 buf.putInt(10)
                 Unit
             }
-            is GlobalConfigKey.MainSelectedWalletId -> {
+            is GlobalConfigKey.HashedPinCode -> {
                 buf.putInt(11)
                 Unit
             }
-            is GlobalConfigKey.DecoySelectedWalletId -> {
+            is GlobalConfigKey.WipeDataPin -> {
                 buf.putInt(12)
                 Unit
             }
-            is GlobalConfigKey.LockedAt -> {
+            is GlobalConfigKey.DecoyPin -> {
                 buf.putInt(13)
                 Unit
             }
-            is GlobalConfigKey.OnboardingProgress -> {
+            is GlobalConfigKey.InDecoyMode -> {
                 buf.putInt(14)
+                Unit
+            }
+            is GlobalConfigKey.MainSelectedWalletId -> {
+                buf.putInt(15)
+                Unit
+            }
+            is GlobalConfigKey.DecoySelectedWalletId -> {
+                buf.putInt(16)
+                Unit
+            }
+            is GlobalConfigKey.LockedAt -> {
+                buf.putInt(17)
+                Unit
+            }
+            is GlobalConfigKey.OnboardingProgress -> {
+                buf.putInt(18)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
@@ -38231,7 +38396,8 @@ enum class GlobalFlagKey {
     COMPLETED_ONBOARDING,
     ACCEPTED_TERMS,
     BETA_FEATURES_ENABLED,
-    BETA_IMPORT_EXPORT_ENABLED;
+    BETA_IMPORT_EXPORT_ENABLED,
+    TOR_SETTINGS_DISCOVERED;
 
     
 
@@ -47628,6 +47794,83 @@ public object FfiConverterTypeTapSignerRoute : FfiConverterRustBuffer<TapSignerR
 
 
 
+
+
+sealed class TorBootstrapException(message: String): kotlin.Exception(message) {
+        
+        class BuiltInTor(message: String) : TorBootstrapException(message)
+        
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<TorBootstrapException> {
+        override fun lift(error_buf: RustBuffer.ByValue): TorBootstrapException = FfiConverterTypeTorBootstrapError.lift(error_buf)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTorBootstrapError : FfiConverterRustBuffer<TorBootstrapException> {
+    override fun read(buf: ByteBuffer): TorBootstrapException {
+        
+            return when(buf.getInt()) {
+            1 -> TorBootstrapException.BuiltInTor(FfiConverterString.read(buf))
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+        
+    }
+
+    override fun allocationSize(value: TorBootstrapException): ULong {
+        return 4UL
+    }
+
+    override fun write(value: TorBootstrapException, buf: ByteBuffer) {
+        when(value) {
+            is TorBootstrapException.BuiltInTor -> {
+                buf.putInt(1)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+enum class TorMode {
+    
+    BUILT_IN,
+    ORBOT,
+    EXTERNAL;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTorMode: FfiConverterRustBuffer<TorMode> {
+    override fun read(buf: ByteBuffer) = try {
+        TorMode.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: TorMode) = 4UL
+
+    override fun write(value: TorMode, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
 sealed class Transaction: Disposable  {
     
     data class Confirmed(
@@ -55007,6 +55250,30 @@ object UrExceptionExternalErrorHandler : UniffiRustCallStatusErrorHandler<UrExce
 
 
 
+ fun `clearTorConnectionLogs`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_cove_fn_func_clear_tor_connection_logs(
+    
+        _status)
+}
+    
+    
+
+    @Throws(TorBootstrapException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+     suspend fun `ensureBuiltInTorBootstrap`() : kotlin.String {
+        return uniffiRustCallAsync(
+        UniffiLib.uniffi_cove_fn_func_ensure_built_in_tor_bootstrap(),
+        { future, callback, continuation -> UniffiLib.ffi_cove_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.ffi_cove_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.ffi_cove_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        TorBootstrapException.ErrorHandler,
+    )
+    }
 
         /**
          * set root data directory before any database access
@@ -55020,6 +55287,16 @@ object UrExceptionExternalErrorHandler : UniffiRustCallStatusErrorHandler<UrExce
         FfiConverterString.lower(`path`),_status)
 }
     
+    
+ fun `torConnectionLogs`(): List<kotlin.String> {
+            return FfiConverterSequenceString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_cove_fn_func_tor_connection_logs(
+    
+        _status)
+}
+    )
+    }
     
 
         /**

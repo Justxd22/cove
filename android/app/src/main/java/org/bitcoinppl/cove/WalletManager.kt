@@ -254,6 +254,7 @@ class WalletManager :
                         }
                     }
                 }
+                errorAlert = null
             }
 
             is WalletManagerReconcileMessage.UpdatedTransactions -> {
@@ -264,14 +265,17 @@ class WalletManager :
                         is WalletLoadState.LOADED ->
                             WalletLoadState.LOADED(message.v1)
                     }
+                errorAlert = null
             }
 
             is WalletManagerReconcileMessage.ScanComplete -> {
                 loadState = WalletLoadState.LOADED(message.v1)
+                errorAlert = null
             }
 
             is WalletManagerReconcileMessage.WalletBalanceChanged -> {
                 balance = message.v1
+                errorAlert = null
             }
 
             is WalletManagerReconcileMessage.UnsignedTransactionsChanged -> {
