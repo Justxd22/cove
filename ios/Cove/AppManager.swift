@@ -34,6 +34,12 @@ private let sidebarNavigationDelayMs = 250
     var selectedNode = Database().globalConfig().selectedNode()
     var selectedFiatCurrency = Database().globalConfig().selectedFiatCurrency()
 
+    var pendingNodeUrl = ""
+    var pendingNodeName = ""
+    var pendingNodeTypeName = ""
+    var pendingNodeAwaitingTorSetup = false
+    var pendingNodeTorValidated = false
+
     var nfcReader = NFCReader()
     var nfcWriter = NFCWriter()
     var tapSignerNfc: TapSignerNFC?
@@ -96,6 +102,7 @@ private let sidebarNavigationDelayMs = 250
         fees = try? rust.fees()
 
         self.rust.listenForUpdates(updater: self)
+        warmupTorIfConfigured()
     }
 
     public func getWalletManager(id: WalletId) throws -> WalletManager {
@@ -138,6 +145,29 @@ private let sidebarNavigationDelayMs = 250
         walletManager = vm
     }
 
+    public func clearPendingNodeTorDraft() {
+        pendingNodeUrl = ""
+        pendingNodeName = ""
+        pendingNodeTypeName = ""
+        pendingNodeAwaitingTorSetup = false
+        pendingNodeTorValidated = false
+    }
+
+    private func warmupTorIfConfigured() {
+        guard database.globalConfig().useTor() else { return }
+        let mode = TorMode.fromConfig(try? database.globalConfig().get(key: .torMode))
+        guard mode == .builtIn else { return }
+
+        Task.detached {
+            do {
+                let endpoint = try await ensureBuiltInTorBootstrap()
+                Log.debug("Built-in Tor warmup started at \(endpoint)")
+            } catch {
+                Log.warn("Built-in Tor warmup failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
     public func findTapSignerWallet(_ ts: TapSigner) -> WalletMetadata? {
         rust.findTapSignerWallet(tapSigner: ts)
     }
@@ -161,6 +191,8 @@ private let sidebarNavigationDelayMs = 250
 
         let state = rust.state()
         router = state.router
+        self.rust.listenForUpdates(updater: self)
+        warmupTorIfConfigured()
     }
 
     /// Reload wallets from database (e.g. after cloud restore)
