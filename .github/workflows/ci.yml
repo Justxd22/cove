@@ -59,6 +59,9 @@ jobs:
       - name: Set up just
         uses: extractions/setup-just@v1
 
+      - name: Set up repository
+        run: just setup
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -102,6 +105,9 @@ jobs:
       - name: Set up just
         uses: extractions/setup-just@v1
 
+      - name: Set up repository
+        run: just setup
+
       - name: Build Rust FFI bindings
         run: just build-ios
 
@@ -136,6 +142,12 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Set up just
+        uses: extractions/setup-just@v1
+
+      - name: Set up repository
+        run: just setup
+
       - name: Run tests
         run: cd rust && cargo test --workspace
 
@@ -148,5 +160,11 @@ jobs:
           toolchain: stable
           components: clippy
           override: true
+
+      - name: Set up just
+        uses: extractions/setup-just@v1
+
+      - name: Set up repository
+        run: just setup
 
       - run: cd rust && cargo clippy -- -D warnings
