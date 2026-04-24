@@ -94,6 +94,9 @@ pub enum TapCardParseError {
     #[error("unable to parse slot number: {0}")]
     ParseSlotNumberError(String),
 
+    #[error("invalid SATSCARD slot number: {0}")]
+    InvalidSlotNumber(u32),
+
     #[error("unable to parse signature: {0}")]
     UnableToParseSignature(String),
 
@@ -111,6 +114,7 @@ impl From<parse::Error> for TapCardParseError {
             Error::UnknownCardState(state) => Self::UnknownCardState(state.to_string()),
             Error::EmptyCardState => Self::EmptyCardState,
             Error::UnableToParseSlot(error) => Self::ParseSlotNumberError(error.to_string()),
+            Error::InvalidSlotNumber(slot) => Self::InvalidSlotNumber(slot),
             Error::UnableToParseSignature(error) => Self::UnableToParseSignature(error.to_string()),
         }
     }

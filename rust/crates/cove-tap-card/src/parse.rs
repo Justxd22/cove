@@ -60,6 +60,9 @@ pub enum Error {
     #[error("unable to parse slot number: {0}")]
     UnableToParseSlot(#[from] ParseIntError),
 
+    #[error("invalid SATSCARD slot number: {0}, expected 0..=9")]
+    InvalidSlotNumber(u32),
+
     #[error("unable to parse signature: {0}")]
     UnableToParseSignature(#[from] SignatureParseError),
 }
@@ -128,6 +131,10 @@ pub fn parse_card(url_encoded: &str) -> Result<TapCard> {
     // It's a SatsCard
     let slot_number =
         params.get("o").ok_or(Error::MissingField(Field::SlotNumber))?.parse::<u32>()?;
+
+    if slot_number > 9 {
+        return Err(Error::InvalidSlotNumber(slot_number));
+    }
 
     let address_suffix = params.get("r").ok_or(Error::MissingField(Field::Address))?.to_string();
 
@@ -393,6 +400,25 @@ mod tests {
             panic!("expected UnableToParseSlot, got {err:?}");
         };
         assert_eq!(*parse_err.kind(), std::num::IntErrorKind::InvalidDigit);
+    }
+
+    #[test]
+    fn test_sats_card_slot_number_above_range_errors() {
+        let fragment = SATSCARD_SEALED_FRAGMENT.replace("o=0", "o=10");
+        let err = TapCard::parse(&satscard_https(&fragment)).unwrap_err();
+        assert!(matches!(err, Error::InvalidSlotNumber(10)));
+    }
+
+    #[test]
+    fn test_sats_card_max_valid_slot_number_parses() {
+        let fragment = SATSCARD_SEALED_FRAGMENT.replace("o=0", "o=9");
+        let TapCard::SatsCard(sats_card) = TapCard::parse(&satscard_https(&fragment)).unwrap()
+        else {
+            panic!("not a sats card");
+        };
+
+        assert_eq!(sats_card.slot_number, 9);
+        assert_eq!(sats_card.state, SatsCardState::Sealed);
     }
 
     #[test]
