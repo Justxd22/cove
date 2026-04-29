@@ -281,17 +281,27 @@ struct SelectedWalletScreen: View {
 
         let logs = torConnectionLogs()
         let snapshot = deriveBuiltInBootstrapSnapshot(logs)
+        let structuredStatus = builtInTorBootstrapStatus()
+        let hasStructuredStatus = structuredStatus.launched
         quick.logs = recentTorLogs(logs)
 
-        if snapshot.isReady {
+        if structuredStatus.ready || (!hasStructuredStatus && snapshot.isReady) {
             quick.torConnection = .green
             quick.torMessage = "Built-in Tor ready"
-        } else if snapshot.hasError {
+        } else if let lastError = structuredStatus.lastError {
+            quick.torConnection = .red
+            quick.torMessage = lastError
+        } else if !hasStructuredStatus, snapshot.hasError {
             quick.torConnection = .red
             quick.torMessage = snapshot.step
         } else {
+            let message =
+                structuredStatus.blocked.map { "Blocked: \($0)" }
+                    ?? (leadingPercent(snapshot.step) != nil ? snapshot.step : nil)
+                    ?? (hasStructuredStatus && !structuredStatus.message.isEmpty ? structuredStatus.message : snapshot.step)
+            let percent = leadingPercent(message) ?? (hasStructuredStatus ? Int(structuredStatus.percent) : snapshot.percent)
             quick.torConnection = .yellow
-            quick.torMessage = "\(snapshot.percent)% \(snapshot.step)"
+            quick.torMessage = "Built-in Tor bootstrapping (\(percent)%)"
         }
     }
 
@@ -360,7 +370,43 @@ struct SelectedWalletScreen: View {
     }
 
     private func recentTorLogs(_ logs: [String]) -> [String] {
-        Array(logs.dropFirst(max(logs.count - 6, 0)))
+        let usefulMarkers = [
+            "arti_client::status",
+            "tor_dirmgr",
+            "tor_guardmgr",
+            "tor_runtime",
+            "bootstrapped",
+            "bootstrap",
+            "directory",
+            "consensus",
+            "microdescriptors",
+            "failed",
+            "error",
+            "warn",
+        ]
+        let usefulLogs = logs
+            .filter { line in
+                usefulMarkers.contains { marker in
+                    line.range(of: marker, options: .caseInsensitive) != nil
+                }
+            }
+            .map { line in
+                line.replacingOccurrences(
+                    of: #"^\[(INFO|WARN|ERROR|DEBUG) [^\]]+]\s*"#,
+                    with: "",
+                    options: .regularExpression
+                )
+            }
+            .filter { !$0.isEmpty }
+
+        return Array(NSOrderedSet(array: usefulLogs).array.compactMap { $0 as? String }.suffix(6))
+    }
+
+    private func leadingPercent(_ message: String) -> Int? {
+        guard let match = message.range(of: #"^\d{1,3}(?=%:)"#, options: .regularExpression) else {
+            return nil
+        }
+        return Int(message[match]).map { min(max($0, 0), 100) }
     }
 
     var titleContent: some View {

@@ -1032,6 +1032,8 @@ internal object IntegrityCheckingUniffiLib {
         uniffiCheckContractApiVersion(this)
         uniffiCheckApiChecksums(this)
     }
+    external fun uniffi_cove_checksum_func_built_in_tor_bootstrap_status(
+    ): Short
     external fun uniffi_cove_checksum_func_clear_tor_connection_logs(
     ): Short
     external fun uniffi_cove_checksum_func_ensure_built_in_tor_bootstrap(
@@ -3322,6 +3324,8 @@ internal object UniffiLib {
     ): Byte
     external fun uniffi_cove_fn_method_walletmetadata_uniffi_trait_hash(`ptr`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
+    external fun uniffi_cove_fn_func_built_in_tor_bootstrap_status(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_cove_fn_func_clear_tor_connection_logs(uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     external fun uniffi_cove_fn_func_ensure_built_in_tor_bootstrap(
@@ -3543,6 +3547,9 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 }
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
+    if (lib.uniffi_cove_checksum_func_built_in_tor_bootstrap_status() != 39940.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_cove_checksum_func_clear_tor_connection_logs() != 25876.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -27848,6 +27855,64 @@ public object FfiConverterTypeBackupWalletSummary: FfiConverterRustBuffer<Backup
 
 
 
+data class BuiltInTorBootstrapStatus (
+    var `percent`: kotlin.UInt
+    , 
+    var `ready`: kotlin.Boolean
+    , 
+    var `blocked`: kotlin.String?
+    , 
+    var `message`: kotlin.String
+    , 
+    var `launched`: kotlin.Boolean
+    , 
+    var `lastError`: kotlin.String?
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBuiltInTorBootstrapStatus: FfiConverterRustBuffer<BuiltInTorBootstrapStatus> {
+    override fun read(buf: ByteBuffer): BuiltInTorBootstrapStatus {
+        return BuiltInTorBootstrapStatus(
+            FfiConverterUInt.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BuiltInTorBootstrapStatus) = (
+            FfiConverterUInt.allocationSize(value.`percent`) +
+            FfiConverterBoolean.allocationSize(value.`ready`) +
+            FfiConverterOptionalString.allocationSize(value.`blocked`) +
+            FfiConverterString.allocationSize(value.`message`) +
+            FfiConverterBoolean.allocationSize(value.`launched`) +
+            FfiConverterOptionalString.allocationSize(value.`lastError`)
+    )
+
+    override fun write(value: BuiltInTorBootstrapStatus, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`percent`, buf)
+            FfiConverterBoolean.write(value.`ready`, buf)
+            FfiConverterOptionalString.write(value.`blocked`, buf)
+            FfiConverterString.write(value.`message`, buf)
+            FfiConverterBoolean.write(value.`launched`, buf)
+            FfiConverterOptionalString.write(value.`lastError`, buf)
+    }
+}
+
+
+
 data class CloudBackupDetail (
     var `lastSync`: kotlin.ULong?
     , 
@@ -38309,6 +38374,14 @@ sealed class GlobalConfigTableException: kotlin.Exception() {
             get() = ""
     }
     
+    class BuiltInTorStop(
+        
+        val v1: kotlin.String
+        ) : GlobalConfigTableException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
 
     
 
@@ -38344,6 +38417,9 @@ public object FfiConverterTypeGlobalConfigTableError : FfiConverterRustBuffer<Gl
                 FfiConverterString.read(buf),
                 )
             3 -> GlobalConfigTableException.PinCodeMustBeHashed()
+            4 -> GlobalConfigTableException.BuiltInTorStop(
+                FfiConverterString.read(buf),
+                )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
     }
@@ -38364,6 +38440,11 @@ public object FfiConverterTypeGlobalConfigTableError : FfiConverterRustBuffer<Gl
                 // Add the size for the Int that specifies the variant plus the size needed for all fields
                 4UL
             )
+            is GlobalConfigTableException.BuiltInTorStop -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
         }
     }
 
@@ -38381,6 +38462,11 @@ public object FfiConverterTypeGlobalConfigTableError : FfiConverterRustBuffer<Gl
             }
             is GlobalConfigTableException.PinCodeMustBeHashed -> {
                 buf.putInt(3)
+                Unit
+            }
+            is GlobalConfigTableException.BuiltInTorStop -> {
+                buf.putInt(4)
+                FfiConverterString.write(value.v1, buf)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
@@ -55250,6 +55336,16 @@ object UrExceptionExternalErrorHandler : UniffiRustCallStatusErrorHandler<UrExce
 
 
 
+ fun `builtInTorBootstrapStatus`(): BuiltInTorBootstrapStatus {
+            return FfiConverterTypeBuiltInTorBootstrapStatus.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_cove_fn_func_built_in_tor_bootstrap_status(
+    
+        _status)
+}
+    )
+    }
+    
  fun `clearTorConnectionLogs`()
         = 
     uniffiRustCall() { _status ->

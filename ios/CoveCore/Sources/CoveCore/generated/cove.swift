@@ -13064,6 +13064,76 @@ public func FfiConverterTypeBackupWalletSummary_lower(_ value: BackupWalletSumma
 }
 
 
+public struct BuiltInTorBootstrapStatus: Equatable, Hashable {
+    public var percent: UInt32
+    public var ready: Bool
+    public var blocked: String?
+    public var message: String
+    public var launched: Bool
+    public var lastError: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(percent: UInt32, ready: Bool, blocked: String?, message: String, launched: Bool, lastError: String?) {
+        self.percent = percent
+        self.ready = ready
+        self.blocked = blocked
+        self.message = message
+        self.launched = launched
+        self.lastError = lastError
+    }
+
+    
+
+    
+}
+
+#if compiler(>=6)
+extension BuiltInTorBootstrapStatus: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeBuiltInTorBootstrapStatus: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> BuiltInTorBootstrapStatus {
+        return
+            try BuiltInTorBootstrapStatus(
+                percent: FfiConverterUInt32.read(from: &buf), 
+                ready: FfiConverterBool.read(from: &buf), 
+                blocked: FfiConverterOptionString.read(from: &buf), 
+                message: FfiConverterString.read(from: &buf), 
+                launched: FfiConverterBool.read(from: &buf), 
+                lastError: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: BuiltInTorBootstrapStatus, into buf: inout [UInt8]) {
+        FfiConverterUInt32.write(value.percent, into: &buf)
+        FfiConverterBool.write(value.ready, into: &buf)
+        FfiConverterOptionString.write(value.blocked, into: &buf)
+        FfiConverterString.write(value.message, into: &buf)
+        FfiConverterBool.write(value.launched, into: &buf)
+        FfiConverterOptionString.write(value.lastError, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeBuiltInTorBootstrapStatus_lift(_ buf: RustBuffer) throws -> BuiltInTorBootstrapStatus {
+    return try FfiConverterTypeBuiltInTorBootstrapStatus.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeBuiltInTorBootstrapStatus_lower(_ value: BuiltInTorBootstrapStatus) -> RustBuffer {
+    return FfiConverterTypeBuiltInTorBootstrapStatus.lower(value)
+}
+
+
 public struct CloudBackupDetail: Equatable, Hashable {
     public var lastSync: UInt64?
     public var upToDate: [CloudBackupWalletItem]
@@ -21837,6 +21907,8 @@ enum GlobalConfigTableError: Swift.Error, Equatable, Hashable, Foundation.Locali
     case Read(String
     )
     case PinCodeMustBeHashed
+    case BuiltInTorStop(String
+    )
 
     
 
@@ -21883,6 +21955,9 @@ public struct FfiConverterTypeGlobalConfigTableError: FfiConverterRustBuffer {
             try FfiConverterString.read(from: &buf)
             )
         case 3: return .PinCodeMustBeHashed
+        case 4: return .BuiltInTorStop(
+            try FfiConverterString.read(from: &buf)
+            )
 
          default: throw UniffiInternalError.unexpectedEnumCase
         }
@@ -21908,6 +21983,11 @@ public struct FfiConverterTypeGlobalConfigTableError: FfiConverterRustBuffer {
         case .PinCodeMustBeHashed:
             writeInt(&buf, Int32(3))
         
+        
+        case let .BuiltInTorStop(v1):
+            writeInt(&buf, Int32(4))
+            FfiConverterString.write(v1, into: &buf)
+            
         }
     }
 }
@@ -36052,6 +36132,12 @@ private func uniffiForeignFutureDroppedCallback(handle: UInt64) {
 public func uniffiForeignFutureHandleCountCove() -> Int {
     UNIFFI_FOREIGN_FUTURE_HANDLE_MAP.count
 }
+public func builtInTorBootstrapStatus() -> BuiltInTorBootstrapStatus  {
+    return try!  FfiConverterTypeBuiltInTorBootstrapStatus_lift(try! rustCall() {
+    uniffi_cove_fn_func_built_in_tor_bootstrap_status($0
+    )
+})
+}
 public func clearTorConnectionLogs()  {try! rustCall() {
     uniffi_cove_fn_func_clear_tor_connection_logs($0
     )
@@ -36491,6 +36577,9 @@ private let initializationResult: InitializationResult = {
     let scaffolding_contract_version = ffi_cove_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
+    }
+    if (uniffi_cove_checksum_func_built_in_tor_bootstrap_status() != 39940) {
+        return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_cove_checksum_func_clear_tor_connection_logs() != 25876) {
         return InitializationResult.apiChecksumMismatch
