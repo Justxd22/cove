@@ -29400,8 +29400,8 @@ enum TorBootstrapError: Swift.Error, Equatable, Hashable, Foundation.LocalizedEr
 
     
     
-    case BuiltInTor(message: String)
-    
+    case BuiltInTor(String
+    )
 
     
 
@@ -29432,24 +29432,24 @@ public struct FfiConverterTypeTorBootstrapError: FfiConverterRustBuffer {
 
         
         case 1: return .BuiltInTor(
-            message: try FfiConverterString.read(from: &buf)
-        )
-        
+            try FfiConverterString.read(from: &buf)
+            )
 
-        default: throw UniffiInternalError.unexpectedEnumCase
+         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: TorBootstrapError, into buf: inout [UInt8]) {
         switch value {
 
-        
 
-        
-        case .BuiltInTor(_ /* message is ignored*/):
+
+
+
+        case let .BuiltInTor(v1):
             writeInt(&buf, Int32(1))
+            FfiConverterString.write(v1, into: &buf)
 
-        
         }
     }
 }

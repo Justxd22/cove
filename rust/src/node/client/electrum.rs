@@ -62,7 +62,13 @@ impl ElectrumClient {
         options: &NodeClientOptions,
     ) -> Result<Self, Error> {
         let url = node.url.strip_suffix('/').unwrap_or(&node.url).to_string();
-        debug!(url = %url, options = ?options, "creating electrum client from node and options");
+        debug!(
+            api_type = "electrum",
+            tor_enabled = options.use_tor,
+            tor_mode = ?options.tor_mode,
+            batch_size = options.batch_size,
+            "creating electrum client from node and options"
+        );
         let config = Self::connection_config(options);
         let retry_delays = if options.use_tor && matches!(options.tor_mode, TorMode::BuiltIn) {
             BUILT_IN_TOR_CONNECT_RETRY_DELAYS_MS.as_slice()
@@ -85,7 +91,9 @@ impl ElectrumClient {
                         && let Some(delay_ms) = retry_delays.get(attempt).copied()
                     {
                         warn!(
-                            node_url = %url,
+                            api_type = "electrum",
+                            tor_enabled = options.use_tor,
+                            tor_mode = ?options.tor_mode,
                             attempt = attempt + 1,
                             max_retries = retry_delays.len(),
                             delay_ms,
@@ -104,11 +112,9 @@ impl ElectrumClient {
                         };
 
                     error!(
-                        node_url = %url,
+                        api_type = "electrum",
                         tor_enabled = options.use_tor,
                         tor_mode = ?options.tor_mode,
-                        tor_host = %options.tor_external_host,
-                        tor_port = options.tor_external_port,
                         attempt = attempt + 1,
                         max_retries = retry_delays.len(),
                         built_in_tor_status = %built_in_tor_status,
@@ -354,7 +360,12 @@ impl ElectrumClient {
     fn connection_config(options: &NodeClientOptions) -> Config {
         let socks5_addr = if options.use_tor {
             let endpoint = format!("{}:{}", options.tor_external_host, options.tor_external_port);
-            debug!(endpoint = %endpoint, tor_mode = ?options.tor_mode, "electrum using socks5 endpoint");
+            debug!(
+                api_type = "electrum",
+                tor_enabled = true,
+                tor_mode = ?options.tor_mode,
+                "electrum using socks5 endpoint"
+            );
             Some(endpoint)
         } else {
             debug!("electrum connecting without tor proxy");

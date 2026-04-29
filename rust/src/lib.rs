@@ -100,7 +100,6 @@ pub enum InitError {
 }
 
 #[derive(Debug, Clone, uniffi::Error, thiserror::Error)]
-#[uniffi(flat_error)]
 pub enum TorBootstrapError {
     #[error("failed to initialize built-in tor proxy: {0}")]
     BuiltInTor(String),

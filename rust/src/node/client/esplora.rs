@@ -40,13 +40,24 @@ impl EsploraClient {
         node: &Node,
         options: &NodeClientOptions,
     ) -> Result<Self, Error> {
-        debug!(url = %node.url, options = ?options, "creating esplora client from node and options");
+        debug!(
+            api_type = "esplora",
+            tor_enabled = options.use_tor,
+            tor_mode = ?options.tor_mode,
+            batch_size = options.batch_size,
+            "creating esplora client from node and options"
+        );
         let mut builder = esplora_client::Builder::new(&node.url);
 
         if options.use_tor {
+            debug!(
+                api_type = "esplora",
+                tor_enabled = true,
+                tor_mode = ?options.tor_mode,
+                "esplora using socks proxy"
+            );
             let proxy =
                 format!("socks5h://{}:{}", options.tor_external_host, options.tor_external_port);
-            debug!(proxy = %proxy, tor_mode = ?options.tor_mode, "esplora using socks proxy");
             builder = builder.proxy(&proxy);
         } else {
             debug!("esplora connecting without tor proxy");

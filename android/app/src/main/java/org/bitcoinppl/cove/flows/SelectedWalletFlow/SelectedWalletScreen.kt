@@ -310,9 +310,11 @@ fun SelectedWalletScreen(
                 when (torMode) {
                     TorMode.BUILT_IN -> {
                         if (!builtInWarmupRequested) {
-                            builtInWarmupRequested = true
                             runCatching { ensureBuiltInTorBootstrap() }
-                                .onSuccess { endpoint -> builtInEndpoint = endpoint }
+                                .onSuccess { endpoint ->
+                                    builtInEndpoint = endpoint
+                                    builtInWarmupRequested = true
+                                }
                         }
                         val (builtInHost, builtInPort) =
                             parseEndpointHostPort(builtInEndpoint)

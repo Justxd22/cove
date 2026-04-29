@@ -47882,14 +47882,25 @@ public object FfiConverterTypeTapSignerRoute : FfiConverterRustBuffer<TapSignerR
 
 
 
-sealed class TorBootstrapException(message: String): kotlin.Exception(message) {
-        
-        class BuiltInTor(message: String) : TorBootstrapException(message)
-        
+sealed class TorBootstrapException: kotlin.Exception() {
+
+    class BuiltInTor(
+
+        val v1: kotlin.String
+        ) : TorBootstrapException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+
+
+
+
 
     companion object ErrorHandler : UniffiRustCallStatusErrorHandler<TorBootstrapException> {
         override fun lift(error_buf: RustBuffer.ByValue): TorBootstrapException = FfiConverterTypeTorBootstrapError.lift(error_buf)
     }
+
+
 }
 
 /**
@@ -47897,22 +47908,31 @@ sealed class TorBootstrapException(message: String): kotlin.Exception(message) {
  */
 public object FfiConverterTypeTorBootstrapError : FfiConverterRustBuffer<TorBootstrapException> {
     override fun read(buf: ByteBuffer): TorBootstrapException {
-        
-            return when(buf.getInt()) {
-            1 -> TorBootstrapException.BuiltInTor(FfiConverterString.read(buf))
+
+
+        return when(buf.getInt()) {
+            1 -> TorBootstrapException.BuiltInTor(
+                FfiConverterString.read(buf),
+                )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
-        
     }
 
     override fun allocationSize(value: TorBootstrapException): ULong {
-        return 4UL
+        return when(value) {
+            is TorBootstrapException.BuiltInTor -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
     }
 
     override fun write(value: TorBootstrapException, buf: ByteBuffer) {
         when(value) {
             is TorBootstrapException.BuiltInTor -> {
                 buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
                 Unit
             }
         }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
@@ -55938,5 +55958,4 @@ object UrExceptionExternalErrorHandler : UniffiRustCallStatusErrorHandler<UrExce
     )
     }
     
-
 
