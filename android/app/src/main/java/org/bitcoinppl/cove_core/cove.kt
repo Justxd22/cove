@@ -47883,24 +47883,24 @@ public object FfiConverterTypeTapSignerRoute : FfiConverterRustBuffer<TapSignerR
 
 
 sealed class TorBootstrapException: kotlin.Exception() {
-
+    
     class BuiltInTor(
-
+        
         val v1: kotlin.String
         ) : TorBootstrapException() {
         override val message
             get() = "v1=${ v1 }"
     }
+    
 
-
-
+    
 
 
     companion object ErrorHandler : UniffiRustCallStatusErrorHandler<TorBootstrapException> {
         override fun lift(error_buf: RustBuffer.ByValue): TorBootstrapException = FfiConverterTypeTorBootstrapError.lift(error_buf)
     }
 
-
+    
 }
 
 /**
@@ -47908,7 +47908,7 @@ sealed class TorBootstrapException: kotlin.Exception() {
  */
 public object FfiConverterTypeTorBootstrapError : FfiConverterRustBuffer<TorBootstrapException> {
     override fun read(buf: ByteBuffer): TorBootstrapException {
-
+        
 
         return when(buf.getInt()) {
             1 -> TorBootstrapException.BuiltInTor(
@@ -55958,4 +55958,5 @@ object UrExceptionExternalErrorHandler : UniffiRustCallStatusErrorHandler<UrExce
     )
     }
     
+
 

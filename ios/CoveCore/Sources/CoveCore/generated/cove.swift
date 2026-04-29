@@ -29442,14 +29442,14 @@ public struct FfiConverterTypeTorBootstrapError: FfiConverterRustBuffer {
     public static func write(_ value: TorBootstrapError, into buf: inout [UInt8]) {
         switch value {
 
+        
 
-
-
-
+        
+        
         case let .BuiltInTor(v1):
             writeInt(&buf, Int32(1))
             FfiConverterString.write(v1, into: &buf)
-
+            
         }
     }
 }
