@@ -190,6 +190,11 @@
     <string name="menu_manage_utxos">Manage UTXOs</string>
     <string name="menu_wallet_settings">Wallet Settings</string>
     <string name="address_unavailable">Address unavailable</string>
+    <string name="content_description_menu">Menu</string>
+    <string name="content_description_tor_onion">Tor</string>
+    <string name="content_description_tor_status">Tor status</string>
+    <string name="content_description_qr_code">QR Code</string>
+    <string name="content_description_more">More</string>
 
     <!-- Tor Settings -->
     <string name="tor_section_privacy">Tor Network</string>
@@ -258,5 +263,27 @@
     <string name="tor_step_external_ready">Custom proxy configured</string>
     <string name="tor_log_disabled">Tor is currently disabled</string>
     <string name="tor_log_external">Routing via custom proxy</string>
+    <string name="selected_wallet_tor_status_disabled">Tor disabled</string>
+    <string name="selected_wallet_tor_status_built_in_ready">Built-in Tor ready</string>
+    <string name="selected_wallet_tor_status_built_in_error">Built-in Tor error: %1$s</string>
+    <string name="selected_wallet_tor_status_built_in_bootstrapping">Built-in Tor bootstrapping (%1$d%%)</string>
+    <string name="selected_wallet_tor_status_orbot_reachable">Orbot SOCKS endpoint reachable</string>
+    <string name="selected_wallet_tor_status_orbot_unavailable">Orbot SOCKS endpoint unavailable</string>
+    <string name="selected_wallet_tor_status_external_reachable">External SOCKS endpoint reachable</string>
+    <string name="selected_wallet_tor_status_external_unavailable">External SOCKS endpoint unavailable</string>
+    <string name="selected_wallet_node_reachable">Node reachable</string>
+    <string name="selected_wallet_node_connection_failed">Node connection failed</string>
+    <string name="selected_wallet_checking_node_connection">Checking node connection</string>
+    <string name="selected_wallet_node_status_unavailable">Node status unavailable</string>
+    <string name="selected_wallet_node_synced">Node synced</string>
+    <string name="selected_wallet_node_syncing">Node syncing</string>
+    <string name="selected_wallet_node_sync_failed">Node sync failed</string>
+    <string name="selected_wallet_sync_status_unavailable">Sync status unavailable</string>
+    <string name="selected_wallet_tor_network_status">Tor Network Status</string>
+    <string name="selected_wallet_recent_logs">Recent Logs</string>
+    <string name="selected_wallet_network_settings">Network Settings</string>
+    <string name="selected_wallet_tor_connection_title">Tor Connection</string>
+    <string name="selected_wallet_node_reachable_title">Node Reachable</string>
+    <string name="selected_wallet_node_synced_title">Node Synced</string>
     <string name="tor_badge">TOR</string>
 </resources>

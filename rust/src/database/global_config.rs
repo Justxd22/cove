@@ -371,14 +371,14 @@ impl GlobalConfigTable {
                 .map_err(|error| GlobalConfigTableError::Save(error.to_string()))?;
         }
 
-        write_txn.commit().map_err(|error| Error::DatabaseAccess(error.to_string()))?;
-
         if should_stop_built_in_tor && !crate::tor_runtime::request_stop_built_in_proxy() {
             return Err(GlobalConfigTableError::BuiltInTorStop(
                 "timed out waiting for proxy shutdown".to_string(),
             )
             .into());
         }
+
+        write_txn.commit().map_err(|error| Error::DatabaseAccess(error.to_string()))?;
 
         Updater::send_update(Update::DatabaseUpdated);
 

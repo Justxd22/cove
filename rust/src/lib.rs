@@ -88,7 +88,6 @@ use cove_types::color;
 use cove_types::color_scheme;
 use cove_types::network;
 use cove_types::psbt;
-use cove_util::ResultExt as _;
 
 use std::path::PathBuf;
 
@@ -125,8 +124,9 @@ fn set_root_data_dir(path: String) -> Result<(), InitError> {
 
 #[uniffi::export(async_runtime = "tokio")]
 async fn ensure_built_in_tor_bootstrap() -> Result<String, TorBootstrapError> {
-    let endpoint =
-        tor_runtime::built_in_socks_endpoint().await.map_err_str(TorBootstrapError::BuiltInTor)?;
+    let endpoint = tor_runtime::built_in_socks_endpoint().await.map_err(|error| match error {
+        tor_runtime::Error::Proxy(message) => TorBootstrapError::BuiltInTor(message),
+    })?;
     Ok(endpoint.to_string())
 }
 

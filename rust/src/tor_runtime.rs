@@ -82,11 +82,9 @@ fn take_built_in_error() -> Option<String> {
 
 pub(crate) fn built_in_status_summary() -> String {
     let state = BUILT_IN_TOR_STATE.lock();
-    let endpoint =
-        state.endpoint.map(|value| value.to_string()).unwrap_or_else(|| "none".to_string());
-    let last_error = state.last_error.clone().unwrap_or_else(|| "none".to_string());
+    let last_error = if state.last_error.is_some() { "present" } else { "none" };
 
-    format!("endpoint={endpoint}, launched={}, last_error={last_error}", state.launched)
+    format!("launched={}, last_error={last_error}", state.launched)
 }
 
 pub(crate) fn built_in_bootstrap_status() -> BuiltInTorBootstrapStatus {

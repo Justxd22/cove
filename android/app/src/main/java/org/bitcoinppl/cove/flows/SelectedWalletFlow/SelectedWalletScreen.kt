@@ -116,9 +116,9 @@ private data class TorQuickStatus(
     val torConnection: TorStatusDot = TorStatusDot.Gray,
     val nodeReachable: TorStatusDot = TorStatusDot.Gray,
     val nodeSynced: TorStatusDot = TorStatusDot.Gray,
-    val torMessage: String = "Tor disabled",
-    val nodeMessage: String = "Node status unavailable",
-    val syncMessage: String = "Sync status unavailable",
+    val torMessage: String = "",
+    val nodeMessage: String = "",
+    val syncMessage: String = "",
     val logs: List<String> = emptyList(),
 )
 
@@ -168,6 +168,20 @@ private fun leadingPercent(message: String): Int? =
         ?.coerceIn(0, 100)
 
 private fun parseEndpointHostPort(endpoint: String): Pair<String, Int>? {
+    if (endpoint.startsWith('[')) {
+        val closingBracket = endpoint.indexOf(']')
+        if (closingBracket <= 1) {
+            return null
+        }
+        val host = endpoint.substring(1, closingBracket)
+        val portSeparator = endpoint.indexOf(':', startIndex = closingBracket + 1)
+        val port = endpoint.substring(closingBracket + 2).toIntOrNull()
+        if (portSeparator != closingBracket + 1 || host.isBlank() || port == null || port <= 0) {
+            return null
+        }
+        return host to port
+    }
+
     val host = endpoint.substringBefore(':', "")
     val port = endpoint.substringAfter(':', "").toIntOrNull()
     if (host.isBlank() || port == null || port <= 0) {
@@ -274,7 +288,6 @@ fun SelectedWalletScreen(
     val isWatchOnly = manager.walletMetadata?.walletType == WalletType.WATCH_ONLY
     val globalConfig = remember(app) { app.database.globalConfig() }
     var showTorStatusMenu by remember { mutableStateOf(false) }
-    var torQuickStatus by remember { mutableStateOf(TorQuickStatus()) }
     var builtInWarmupRequested by remember { mutableStateOf(false) }
     var builtInEndpoint by remember { mutableStateOf("127.0.0.1:39050") }
     val torBusyBlinkTransition = rememberInfiniteTransition(label = "torBusyBlink")
@@ -289,9 +302,33 @@ fun SelectedWalletScreen(
                 ),
             label = "torBusyBlinkAlpha",
         )
+    val torDisabledText = stringResource(R.string.selected_wallet_tor_status_disabled)
+    val torBuiltInReadyText = stringResource(R.string.selected_wallet_tor_status_built_in_ready)
+    val torOrbotReachableText = stringResource(R.string.selected_wallet_tor_status_orbot_reachable)
+    val torOrbotUnavailableText = stringResource(R.string.selected_wallet_tor_status_orbot_unavailable)
+    val torExternalReachableText = stringResource(R.string.selected_wallet_tor_status_external_reachable)
+    val torExternalUnavailableText = stringResource(R.string.selected_wallet_tor_status_external_unavailable)
+    val torBuiltInErrorText = stringResource(R.string.selected_wallet_tor_status_built_in_error)
+    val torBuiltInBootstrappingText = stringResource(R.string.selected_wallet_tor_status_built_in_bootstrapping)
+    val nodeReachableText = stringResource(R.string.selected_wallet_node_reachable)
+    val nodeConnectionFailedText = stringResource(R.string.selected_wallet_node_connection_failed)
+    val checkingNodeConnectionText = stringResource(R.string.selected_wallet_checking_node_connection)
+    val nodeStatusUnavailableText = stringResource(R.string.selected_wallet_node_status_unavailable)
+    val nodeSyncedText = stringResource(R.string.selected_wallet_node_synced)
+    val nodeSyncingText = stringResource(R.string.selected_wallet_node_syncing)
+    val nodeSyncFailedText = stringResource(R.string.selected_wallet_node_sync_failed)
+    val syncStatusUnavailableText = stringResource(R.string.selected_wallet_sync_status_unavailable)
+    val torQuickStatusDefaults =
+        remember(torDisabledText, nodeStatusUnavailableText, syncStatusUnavailableText) {
+            TorQuickStatus(
+                torMessage = torDisabledText,
+                nodeMessage = nodeStatusUnavailableText,
+                syncMessage = syncStatusUnavailableText,
+            )
+        }
+    var torQuickStatus by remember { mutableStateOf(torQuickStatusDefaults) }
     val torOverallDotAlpha =
         if (torQuickStatus.overall == TorStatusDot.Yellow) torBusyBlinkAlpha.value else 1f
-
     LaunchedEffect(manager, app, globalConfig) {
         while (true) {
             val useTor = runCatching { globalConfig.useTor() }.getOrDefault(false)
@@ -305,7 +342,7 @@ fun SelectedWalletScreen(
             val torMessage: String
             if (!useTor) {
                 torConnection = TorStatusDot.Red
-                torMessage = "Tor disabled"
+                torMessage = torDisabledText
             } else {
                 when (torMode) {
                     TorMode.BUILT_IN -> {
@@ -352,9 +389,9 @@ fun SelectedWalletScreen(
                             }
                         torMessage =
                             when (torConnection) {
-                                TorStatusDot.Green -> "Built-in Tor ready"
-                                TorStatusDot.Red -> "Built-in Tor error: $bootstrapMessage"
-                                else -> "Built-in Tor bootstrapping ($bootstrapPercent%)"
+                                TorStatusDot.Green -> torBuiltInReadyText
+                                TorStatusDot.Red -> torBuiltInErrorText.format(bootstrapMessage)
+                                else -> torBuiltInBootstrappingText.format(bootstrapPercent)
                             }
                     }
                     TorMode.ORBOT -> {
@@ -362,9 +399,9 @@ fun SelectedWalletScreen(
                         torConnection = if (socksReady) TorStatusDot.Green else TorStatusDot.Red
                         torMessage =
                             if (socksReady) {
-                                "Orbot SOCKS endpoint reachable"
+                                torOrbotReachableText
                             } else {
-                                "Orbot SOCKS endpoint unavailable"
+                                torOrbotUnavailableText
                             }
                     }
                     TorMode.EXTERNAL -> {
@@ -380,9 +417,9 @@ fun SelectedWalletScreen(
                         torConnection = if (socksReady) TorStatusDot.Green else TorStatusDot.Red
                         torMessage =
                             if (socksReady) {
-                                "External SOCKS endpoint reachable"
+                                torExternalReachableText
                             } else {
-                                "External SOCKS endpoint unavailable"
+                                torExternalUnavailableText
                             }
                     }
                 }
@@ -397,10 +434,10 @@ fun SelectedWalletScreen(
                 }
             val nodeMessage =
                 when (nodeReachable) {
-                    TorStatusDot.Green -> "Node reachable"
-                    TorStatusDot.Red -> "Node connection failed"
-                    TorStatusDot.Yellow -> "Checking node connection"
-                    TorStatusDot.Gray -> "Node status unavailable"
+                    TorStatusDot.Green -> nodeReachableText
+                    TorStatusDot.Red -> nodeConnectionFailedText
+                    TorStatusDot.Yellow -> checkingNodeConnectionText
+                    TorStatusDot.Gray -> nodeStatusUnavailableText
                 }
 
             val nodeSynced =
@@ -413,10 +450,10 @@ fun SelectedWalletScreen(
                 }
             val syncMessage =
                 when (nodeSynced) {
-                    TorStatusDot.Green -> "Node synced"
-                    TorStatusDot.Yellow -> "Node syncing"
-                    TorStatusDot.Red -> "Node sync failed"
-                    TorStatusDot.Gray -> "Sync status unavailable"
+                    TorStatusDot.Green -> nodeSyncedText
+                    TorStatusDot.Yellow -> nodeSyncingText
+                    TorStatusDot.Red -> nodeSyncFailedText
+                    TorStatusDot.Gray -> syncStatusUnavailableText
                 }
 
             val overall =
@@ -524,14 +561,14 @@ fun SelectedWalletScreen(
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.content_description_back),
                             )
                         }
                     } else {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
-                                contentDescription = "Menu",
+                                contentDescription = stringResource(R.string.content_description_menu),
                             )
                         }
                     }
@@ -554,13 +591,13 @@ fun SelectedWalletScreen(
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.icon_tor_onion),
-                                        contentDescription = "Tor",
+                                        contentDescription = stringResource(R.string.content_description_tor_onion),
                                         tint = Color.White,
                                         modifier = Modifier.size(20.dp),
                                     )
                                     Icon(
                                         imageVector = Icons.Filled.FiberManualRecord,
-                                        contentDescription = "Tor status",
+                                        contentDescription = stringResource(R.string.content_description_tor_status),
                                         tint = torQuickStatus.overall.color(),
                                         modifier =
                                             Modifier
@@ -581,14 +618,26 @@ fun SelectedWalletScreen(
                                         verticalArrangement = Arrangement.spacedBy(12.dp),
                                     ) {
                                         Text(
-                                            text = "Tor Network Status",
+                                            text = stringResource(R.string.selected_wallet_tor_network_status),
                                             style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.Bold,
                                         )
                                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                            TorStatusRow("Tor Connection", torQuickStatus.torConnection, torQuickStatus.torMessage)
-                                            TorStatusRow("Node Reachable", torQuickStatus.nodeReachable, torQuickStatus.nodeMessage)
-                                            TorStatusRow("Node Synced", torQuickStatus.nodeSynced, torQuickStatus.syncMessage)
+                                            TorStatusRow(
+                                                stringResource(R.string.selected_wallet_tor_connection_title),
+                                                torQuickStatus.torConnection,
+                                                torQuickStatus.torMessage,
+                                            )
+                                            TorStatusRow(
+                                                stringResource(R.string.selected_wallet_node_reachable_title),
+                                                torQuickStatus.nodeReachable,
+                                                torQuickStatus.nodeMessage,
+                                            )
+                                            TorStatusRow(
+                                                stringResource(R.string.selected_wallet_node_synced_title),
+                                                torQuickStatus.nodeSynced,
+                                                torQuickStatus.syncMessage,
+                                            )
                                         }
 
                                         if (torQuickStatus.logs.isNotEmpty()) {
@@ -601,7 +650,7 @@ fun SelectedWalletScreen(
                                                         .padding(8.dp),
                                             ) {
                                                 Text(
-                                                    text = "Recent Logs",
+                                                    text = stringResource(R.string.selected_wallet_recent_logs),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     fontWeight = FontWeight.SemiBold,
                                                     color = MaterialTheme.colorScheme.primary,
@@ -620,7 +669,7 @@ fun SelectedWalletScreen(
                                         }
 
                                         Text(
-                                            text = "Network Settings",
+                                            text = stringResource(R.string.selected_wallet_network_settings),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.primary,
@@ -643,7 +692,7 @@ fun SelectedWalletScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.QrCode2,
-                                contentDescription = "QR Code",
+                                contentDescription = stringResource(R.string.content_description_qr_code),
                             )
                         }
                         IconButton(
@@ -652,7 +701,7 @@ fun SelectedWalletScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.MoreVert,
-                                contentDescription = "More",
+                                contentDescription = stringResource(R.string.content_description_more),
                             )
                         }
                     }
